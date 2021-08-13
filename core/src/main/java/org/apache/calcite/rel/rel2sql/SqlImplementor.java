@@ -1133,7 +1133,7 @@ public abstract class SqlImplementor {
         // COUNT(*) FILTER(WHERE b)  ==>  COUNT(CASE WHEN b THEN 1 END)
         // COUNT(x) FILTER(WHERE b)  ==>  COUNT(CASE WHEN b THEN x END)
         // COUNT(x, y) FILTER(WHERE b)  ==>  COUNT(CASE WHEN b THEN x END, y)
-        final SqlNodeList whenList = SqlNodeList.of(field(filterArg));
+        final SqlNodeList whenList = getWhenList(filterArg);
         final SqlNodeList thenList =
             SqlNodeList.of(operandList.isEmpty()
                 ? SqlLiteral.createExactNumeric("1", POS)
@@ -1147,7 +1147,8 @@ public abstract class SqlImplementor {
         if (operandList.size() > 1) {
           newOperandList.addAll(Util.skip(operandList));
         }
-        return toSql(op, distinct, newOperandList, -1, collation);
+        SqlCall sqlCall = toSql(op, distinct, newOperandList, -1, collation);
+        return sqlCall;
       }
 
       if (op instanceof SqlCountAggFunction && operandList.isEmpty()) {
@@ -1170,6 +1171,15 @@ public abstract class SqlImplementor {
 
       // Handle collation
       return withOrder(call2, collation);
+    }
+
+    private SqlNodeList  getWhenList(int filterArg) {
+      SqlNode node = field(filterArg);
+      if (node.getKind().equals(SqlKind.IS_TRUE) && !dialect.supportsIsTrueInsideCaseWhen()) {
+        node = ((SqlCall) node).operand(0);
+      }
+      return SqlNodeList.of(node);
+
     }
 
     /** Wraps a call in a {@link SqlKind#WITHIN_GROUP} call, if
