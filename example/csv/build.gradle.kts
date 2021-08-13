@@ -19,6 +19,14 @@ val sqllineClasspath by configurations.creating {
     extendsFrom(configurations.testRuntimeClasspath.get())
 }
 
+repositories {
+    // At least for RAT
+    mavenCentral()
+    maven {
+        url = uri("https://repo1.maven.org/maven2")
+    }
+}
+
 dependencies {
     api(project(":core"))
     api(project(":file"))
@@ -29,9 +37,11 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind")
     implementation("com.google.guava:guava")
     implementation("org.apache.calcite.avatica:avatica-core")
+    implementation("com.amazon.redshift:redshift-jdbc42:2.0.0.7")
 
     testImplementation("sqlline:sqlline")
     testImplementation(project(":core", "testClasses"))
+    testImplementation("com.amazon.redshift:redshift-jdbc42:2.0.0.7")
 
     sqllineClasspath(project(":example:csv", "testClasses"))
 }

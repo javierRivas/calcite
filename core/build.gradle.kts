@@ -21,6 +21,7 @@ plugins {
     kotlin("jvm")
     id("com.github.vlsi.crlf")
     id("com.github.vlsi.ide")
+    id("com.github.johnrengelman.shadow")
     calcite.fmpp
     calcite.javacc
 }
@@ -35,6 +36,14 @@ val testH2 by configurations.creating(integrationTestConfig)
 val testOracle by configurations.creating(integrationTestConfig)
 val testPostgresql by configurations.creating(integrationTestConfig)
 val testMysql by configurations.creating(integrationTestConfig)
+
+repositories {
+    // At least for RAT
+    mavenCentral()
+    maven {
+        url = uri("https://repo1.maven.org/maven2")
+    }
+}
 
 dependencies {
     api(project(":linq4j"))
@@ -61,6 +70,8 @@ dependencies {
     implementation("commons-io:commons-io")
     implementation("org.codehaus.janino:commons-compiler")
     implementation("org.codehaus.janino:janino")
+    shadow("com.amazon.redshift:redshift-jdbc42:2.0.0.7")
+    implementation("com.amazon.redshift:redshift-jdbc42:2.0.0.7")
 
     testH2("com.h2database:h2")
     testMysql("mysql:mysql-connector-java")
@@ -99,6 +110,12 @@ tasks.jar {
         into("codegen") {
             textFrom("$projectDir/src/main/codegen")
         }
+    }
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>() {
+    manifest {
+        attributes["Main-Class"] = "org.apache.calcite.jdbc.Driver"
     }
 }
 

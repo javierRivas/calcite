@@ -60,6 +60,9 @@ plugins {
 repositories {
     // At least for RAT
     mavenCentral()
+    maven {
+        url = uri("https://repo1.maven.org/maven2")
+    }
 }
 
 fun reportsForHumans() = !(System.getenv()["CI"]?.toBoolean() ?: false)

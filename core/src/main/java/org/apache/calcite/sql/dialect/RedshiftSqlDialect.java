@@ -41,6 +41,10 @@ public class RedshiftSqlDialect extends SqlDialect {
     super(context);
   }
 
+  @Override public boolean supportsAggregateFunctionFilter() {
+    return false;
+  }
+
   @Override public void unparseOffsetFetch(SqlWriter writer, @Nullable SqlNode offset,
       @Nullable SqlNode fetch) {
     unparseFetchUsingLimit(writer, offset, fetch);
